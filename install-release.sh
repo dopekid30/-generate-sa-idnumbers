@@ -897,21 +897,21 @@ main() {
   if [[ "$XRAY_IS_INSTALLED_BEFORE_RUNNING_SCRIPT" -eq '1' ]] && [[ "$FORCE" -eq '0' ]] && [[ "$REINSTALL" -eq '0' ]]; then
     [[ "$XRAY_RUNNING" -eq '1' ]] && start_xray
   else
-  rm -rf /etc/systemd/system/xray.service.d
-  cat > /etc/systemd/system/superxray.service <<EOF
-  [Unit]
-  Description=superxray multi port
-  After=network.target
+    rm -rf /etc/systemd/system/xray.service.d
+    cat > /etc/systemd/system/superxray.service <<EOF
+    [Unit]
+    Description=superxray multi port
+    After=network.target
 
-  [Service]
-  Type=simple
-  ExecStartPre=-/bin/mkdir -p /var/run/xray
-  ExecStart=/bin/chown www-data:www-data /var/run/xray
-  Restart=on-abort
+    [Service]
+    Type=simple
+    ExecStartPre=-/bin/mkdir -p /var/run/xray
+    ExecStart=/bin/chown www-data:www-data /var/run/xray
+    Restart=on-abort
 
-  [Install]
-  WantedBy=multi-user.target
-  EOF
+    [Install]
+    WantedBy=multi-user.target
+    EOF
     systemctl start xray
     systemctl enable xray
     systemctl enable superxray
