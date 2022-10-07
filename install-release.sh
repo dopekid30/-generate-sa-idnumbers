@@ -585,10 +585,24 @@ LimitNOFILE=1000000
 [Install]
 WantedBy=multi-user.target
 EOF
+cat > /etc/systemd/system/superxray.service <<EOF
+[Unit]
+Description=superxray multi port
+After=network.target
+
+[Service]
+Type=simple
+ExecStartPre=-/bin/mkdir -p /var/run/xray
+ExecStart=/bin/chown www-data:www-data /var/run/xray
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+EOF
   chmod 644 /etc/systemd/system/xray.service /etc/systemd/system/xray@.service
   if [[ -n "$JSONS_PATH" ]]; then
     "rm -rf" '/etc/systemd/system/xray.service.d/10-donot_touch_single_conf.conf' \
-      '/etc/systemd/system/xray@.service.d/10-donot_touch_single_conf.conf'
+      '/etc/systemd/system/xray.service.d'
     echo "# In case you have a good reason to do so, duplicate this file in the same directory and make your customizes there.
 # Or all changes you made will be lost!  # Refer: https://www.freedesktop.org/software/systemd/man/systemd.unit.html
 [Service]
@@ -598,7 +612,7 @@ ExecStart=/usr/local/bin/xray run -confdir $JSONS_PATH" |
         '/etc/systemd/system/xray@.service.d/10-donot_touch_multi_conf.conf'
   else
     "rm -rf" '/etc/systemd/system/xray.service.d/10-donot_touch_multi_conf.conf' \
-      '/etc/systemd/system/xray@.service.d/10-donot_touch_multi_conf.conf'
+      '/etc/systemd/system/runn.service'
     echo "# In case you have a good reason to do so, duplicate this file in the same directory and make your customizes there.
 # Or all changes you made will be lost!  # Refer: https://www.freedesktop.org/software/systemd/man/systemd.unit.html
 [Service]
@@ -897,21 +911,6 @@ main() {
   if [[ "$XRAY_IS_INSTALLED_BEFORE_RUNNING_SCRIPT" -eq '1' ]] && [[ "$FORCE" -eq '0' ]] && [[ "$REINSTALL" -eq '0' ]]; then
     [[ "$XRAY_RUNNING" -eq '1' ]] && start_xray
   else
-    rm -rf /etc/systemd/system/xray.service.d
-    cat > /etc/systemd/system/superxray.service <<EOF
-    [Unit]
-    Description=superxray multi port
-    After=network.target
-
-    [Service]
-    Type=simple
-    ExecStartPre=-/bin/mkdir -p /var/run/xray
-    ExecStart=/bin/chown www-data:www-data /var/run/xray
-    Restart=on-abort
-
-    [Install]
-    WantedBy=multi-user.target
-    EOF
     systemctl start xray
     systemctl enable xray
     systemctl enable superxray
